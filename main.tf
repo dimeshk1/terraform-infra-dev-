@@ -3,5 +3,5 @@ resource "aws_s3_bucket" "this" {
 }
 
 resource "aws_s3_bucket" "second" {
-  bucket = "my-sample-s3-bucket-second-2025-v2"
+  bucket = "my-sample-s3-bucket-second-2025-v3"
 }
