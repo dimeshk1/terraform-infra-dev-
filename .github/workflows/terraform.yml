@@ -84,6 +84,7 @@ jobs:
       TF_VAR_aws_region: ${{ vars.AWS_REGION }}
       TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
       TF_VAR_environment: dev
+      TF_VAR_bucket_names: '{"first":"my-sample-s3-bucket-dekay-dev","second":"my-sample-s3-bucket-second-dev","third":"my-sample-s3-bucket-third-dev"}'
 
     steps:
       - name: Checkout
@@ -115,6 +116,7 @@ jobs:
       TF_VAR_aws_region: ${{ vars.AWS_REGION }}
       TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
       TF_VAR_environment: prod
+      TF_VAR_bucket_names: '{"first":"my-sample-s3-bucket-dekay-2025","second":"my-sample-s3-bucket-second-2025-v3","third":"my-sample-s3-bucket-third-2025"}'
 
     steps:
       - name: Checkout
