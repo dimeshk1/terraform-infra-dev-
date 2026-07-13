@@ -9,6 +9,9 @@ terraform.tfstate.backup
 *.tfvars
 *.tfvars.json
 
+# Allow environment tfvars (no secrets, only resource config)
+!envs/**/*.tfvars
+
 # Crash logs
 crash.log
 crash.*.log
