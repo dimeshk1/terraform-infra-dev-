@@ -24,5 +24,5 @@ variable "environment" {
 variable "bucket_names" {
   description = "List of S3 bucket names to create."
   type        = map(string)
-  default     = {}
+
 }
