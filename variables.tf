@@ -24,5 +24,8 @@ variable "environment" {
 variable "bucket_names" {
   description = "List of S3 bucket names to create."
   type        = map(string)
-  default     = {}
+  default = {
+    first  = "my-sample-s3-bucket-dekay-2025"
+    second = "my-sample-s3-bucket-second-2025"
+  }
 }
