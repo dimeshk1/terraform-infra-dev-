@@ -50,8 +50,8 @@ jobs:
         run: |
           terraform plan -no-color \
             -var="aws_region=${{ vars.AWS_REGION }}" \
-            -var="project_name=${{ vars.PROJECT_NAME }}" \
-            -var="environment=${{ vars.ENVIRONMENT }}" \
+            -var="project_name=$(echo '${{ vars.PROJECT_NAME }}' | tr -d '\n')" \
+            -var="environment=$(echo '${{ vars.ENVIRONMENT }}' | tr -d '\n')" \
             2>&1 | tee plan_output.txt
 
       - name: Post Plan to PR
@@ -103,5 +103,5 @@ jobs:
         run: |
           terraform apply -auto-approve \
             -var="aws_region=${{ vars.AWS_REGION }}" \
-            -var="project_name=${{ vars.PROJECT_NAME }}" \
-            -var="environment=${{ vars.ENVIRONMENT }}"
+            -var="project_name=$(echo '${{ vars.PROJECT_NAME }}' | tr -d '\n')" \
+            -var="environment=$(echo '${{ vars.ENVIRONMENT }}' | tr -d '\n')"
