@@ -20,6 +20,10 @@ jobs:
     name: Terraform CI
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    env:
+      TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+      TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
+      TF_VAR_environment: ${{ vars.ENVIRONMENT }}
 
     steps:
       - name: Checkout
@@ -47,12 +51,7 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: |
-          terraform plan -no-color \
-            -var="aws_region=${{ vars.AWS_REGION }}" \
-            -var="project_name=$(echo '${{ vars.PROJECT_NAME }}' | tr -d '\n')" \
-            -var="environment=$(echo '${{ vars.ENVIRONMENT }}' | tr -d '\n')" \
-            2>&1 | tee plan_output.txt
+        run: terraform plan -no-color 2>&1 | tee plan_output.txt
 
       - name: Post Plan to PR
         uses: actions/github-script@v7
@@ -80,6 +79,10 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     environment: production   # Requires manual approval in GitHub
+    env:
+      TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+      TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
+      TF_VAR_environment: ${{ vars.ENVIRONMENT }}
 
     steps:
       - name: Checkout
@@ -100,8 +103,4 @@ jobs:
         run: terraform init
 
       - name: Terraform Apply
-        run: |
-          terraform apply -auto-approve \
-            -var="aws_region=${{ vars.AWS_REGION }}" \
-            -var="project_name=$(echo '${{ vars.PROJECT_NAME }}' | tr -d '\n')" \
-            -var="environment=$(echo '${{ vars.ENVIRONMENT }}' | tr -d '\n')"
+        run: terraform apply -auto-approve
