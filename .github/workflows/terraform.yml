@@ -25,6 +25,7 @@ jobs:
       TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
       TF_VAR_environment: ${{ github.base_ref == 'main' && 'prod' || 'dev' }}
 
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -82,13 +83,7 @@ jobs:
 
   terraform-cd-dev:
     name: Terraform Apply (dev)
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-    environment: dev
-    env:
-      TF_VAR_aws_region: ${{ vars.AWS_REGION }}
-      TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
-      TF_VAR_environment: dev
+
 
     steps:
       - name: Checkout
@@ -106,7 +101,7 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Terraform Init
-        run: terraform init -backend-config="key=dev/terraform.tfstate"
+
 
       - name: Terraform Apply
         run: terraform apply -auto-approve
@@ -120,6 +115,7 @@ jobs:
       TF_VAR_aws_region: ${{ vars.AWS_REGION }}
       TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
       TF_VAR_environment: prod
+      TF_VAR_bucket_names: '{"first":"my-sample-s3-bucket-dekay-2025","second":"my-sample-s3-bucket-second-2025-v3","third":"my-sample-s3-bucket-third-2025"}'
 
     steps:
       - name: Checkout
