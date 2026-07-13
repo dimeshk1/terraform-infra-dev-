@@ -26,7 +26,6 @@ variable "bucket_names" {
   type        = map(string)
   default = {
     first  = "my-sample-s3-bucket-dekay-2025"
-    second = "my-sample-s3-bucket-second-2025-v3"
-    third  = "my-sample-s3-bucket-third-2025"
+    second = "my-sample-s3-bucket-second-2025"
   }
 }

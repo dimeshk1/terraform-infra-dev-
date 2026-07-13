@@ -2,9 +2,9 @@ name: Terraform CI/CD
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, dev]
   push:
-    branches: [main]
+    branches: [main, dev]
 
 env:
   TF_VERSION: "1.14.9"
@@ -20,6 +20,11 @@ jobs:
     name: Terraform CI
     runs-on: ubuntu-latest
     if: github.event_name == 'pull_request'
+    env:
+      TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+      TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
+      TF_VAR_environment: ${{ github.base_ref == 'main' && 'prod' || 'dev' }}
+      TF_VAR_bucket_names: ${{ github.base_ref == 'main' && '{"first":"my-sample-s3-bucket-dekay-2025","second":"my-sample-s3-bucket-second-2025-v3","third":"my-sample-s3-bucket-third-2025"}' || '{"first":"my-sample-s3-bucket-dekay-dev","second":"my-sample-s3-bucket-second-dev","third":"my-sample-s3-bucket-third-dev"}' }}
 
     steps:
       - name: Checkout
@@ -40,7 +45,8 @@ jobs:
         run: terraform fmt -check -recursive
 
       - name: Terraform Init
-        run: terraform init
+        run: |
+          terraform init -backend-config="key=${{ github.base_ref == 'main' && 'prod' || 'dev' }}/terraform.tfstate"
 
       - name: Terraform Validate
         run: terraform validate
@@ -48,11 +54,8 @@ jobs:
       - name: Terraform Plan
         id: plan
         run: |
-          terraform plan -no-color \
-            -var="aws_region=${{ vars.AWS_REGION }}" \
-            -var="project_name=${{ vars.PROJECT_NAME }}" \
-            -var="environment=${{ vars.ENVIRONMENT }}" \
-            2>&1 | tee plan_output.txt
+          set -o pipefail
+          terraform plan -no-color 2>&1 | tee plan_output.txt
 
       - name: Post Plan to PR
         uses: actions/github-script@v7
@@ -75,11 +78,16 @@ jobs:
               body: output
             });
 
-  terraform-cd:
-    name: Terraform Apply
+  terraform-cd-dev:
+    name: Terraform Apply (dev)
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    environment: production   # Requires manual approval in GitHub
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    environment: dev
+    env:
+      TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+      TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
+      TF_VAR_environment: dev
+      TF_VAR_bucket_names: '{"first":"my-sample-s3-bucket-dekay-dev","second":"my-sample-s3-bucket-second-dev","third":"my-sample-s3-bucket-third-dev"}'
 
     steps:
       - name: Checkout
@@ -97,11 +105,39 @@ jobs:
           terraform_version: ${{ env.TF_VERSION }}
 
       - name: Terraform Init
-        run: terraform init
+        run: terraform init -backend-config="key=dev/terraform.tfstate"
 
       - name: Terraform Apply
-        run: |
-          terraform apply -auto-approve \
-            -var="aws_region=${{ vars.AWS_REGION }}" \
-            -var="project_name=${{ vars.PROJECT_NAME }}" \
-            -var="environment=${{ vars.ENVIRONMENT }}"
+        run: terraform apply -auto-approve
+
+  terraform-cd-prod:
+    name: Terraform Apply (prod)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: production
+    env:
+      TF_VAR_aws_region: ${{ vars.AWS_REGION }}
+      TF_VAR_project_name: ${{ vars.PROJECT_NAME }}
+      TF_VAR_environment: prod
+      TF_VAR_bucket_names: '{"first":"my-sample-s3-bucket-dekay-2025","second":"my-sample-s3-bucket-second-2025-v3","third":"my-sample-s3-bucket-third-2025"}'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Terraform Init
+        run: terraform init -backend-config="key=prod/terraform.tfstate"
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
