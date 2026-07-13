@@ -1,15 +1,9 @@
 resource "aws_s3_bucket" "this" {
-  bucket = "my-sample-s3-bucket-dekay-2025"
+  for_each = var.bucket_names
+
+  bucket = each.value
 
   tags = {
-    Name = "first-bucket"
-  }
-}
-
-resource "aws_s3_bucket" "second" {
-  bucket = "my-sample-s3-bucket-second-2025-v3"
-
-  tags = {
-    Name = "second-bucket"
+    Name = each.key
   }
 }
