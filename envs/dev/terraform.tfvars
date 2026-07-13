@@ -6,4 +6,5 @@ bucket_names = {
   first  = "my-sample-s3-bucket-dekay-dev"
   second = "my-sample-s3-bucket-second-dev"
   third  = "my-sample-s3-bucket-third-dev"
+  fourth = "my-sample-s3-bucket-fourth-dev"
 }
