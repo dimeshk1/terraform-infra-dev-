@@ -8,7 +8,7 @@ Manages AWS infrastructure for the dev environment using Terraform.
 
 ## Remote State
 
-State is stored remotely in S3 with DynamoDB state locking provisioned by `terraform-bootstrap`.
+State is stored remotely in S3 with S3 lockfiles enabled.
 
 ## Prerequisites
 
@@ -25,12 +25,13 @@ terraform apply
 
 ## CI/CD
 
-GitHub Actions pipeline runs on every PR and push to `main`:
+GitHub Actions pipeline runs on every PR and push to `dev` or `main`:
 
 | Trigger | Jobs |
 |---------|------|
 | Pull Request | `fmt`, `validate`, `plan` (posted as PR comment) |
-| Merge to `main` | `apply` (requires approval) |
+| Push to `dev` | `apply` to dev |
+| Push to `main` | `apply` to production (GitHub `production` environment) |
 
 ## Inputs
 
@@ -39,12 +40,11 @@ GitHub Actions pipeline runs on every PR and push to `main`:
 | `aws_region` | AWS region | `us-east-1` |
 | `project_name` | Project name for tagging | `terraform-infra-dev` |
 | `environment` | Deployment environment | `dev` |
+| `bucket_names` | Map of logical names to globally unique S3 bucket names | `{}` |
 
 ## Outputs
 
 | Output | Description |
 |--------|-------------|
-| `first_bucket_name` | Name of the first S3 bucket |
-| `first_bucket_arn` | ARN of the first S3 bucket |
-| `second_bucket_name` | Name of the second S3 bucket |
-| `second_bucket_arn` | ARN of the second S3 bucket |
+| `bucket_names` | Map of bucket logical names to bucket names |
+| `bucket_arns` | Map of bucket logical names to bucket ARNs |

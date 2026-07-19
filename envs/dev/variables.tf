@@ -14,19 +14,9 @@ variable "environment" {
   description = "Deployment environment."
   type        = string
   default     = "dev"
-
-  validation {
-    condition     = contains(["dev", "qa", "stage", "prod"], var.environment)
-    error_message = "Environment must be one of: dev, qa, stage, prod."
-  }
 }
 
 variable "bucket_names" {
-  description = "List of S3 bucket names to create."
+  description = "Map of logical names to globally unique S3 bucket names."
   type        = map(string)
-  default = {
-    first  = "my-sample-s3-bucket-dekay-2025"
-    second = "my-sample-s3-bucket-second-2025-v3"
-    third  = "my-sample-s3-bucket-third-2025"
-  }
 }
